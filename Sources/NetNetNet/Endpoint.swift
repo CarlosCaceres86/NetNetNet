@@ -8,7 +8,7 @@
 import Foundation
 
 protocol Request {
-    func sendRequest<R: Codable>() async throws -> R
+    func makeCall<R: Codable>() async throws -> R
 }
 
 @available(iOS 15.0, *)
@@ -34,8 +34,8 @@ public class Endpoint: Request {
     private var url: URL? {
         var components = URLComponents()
         
-        components.scheme = NetConfig.shared.config?.scheme
-        components.host = NetConfig.shared.config?.host
+        components.scheme = NetNetNet.shared.apiConfig?.scheme
+        components.host = NetNetNet.shared.apiConfig?.host
         components.path = path
         components.queryItems = queryItems?.map { URLQueryItem(name: $0, value: $1) }
 
@@ -61,7 +61,23 @@ public class Endpoint: Request {
         return request
     }
     
-    public func sendRequest<R: Codable>() async throws -> R {
+    public func makeCall<R: Codable>() async throws -> R {
+        var data: Data
+        
+        if NetNetNet.shared.isCacheEnabled, let cachedData = try fetchDataFromCache() {
+            data = cachedData
+        } else {
+            data = try await fetchDataFromRemote()
+        }
+        
+        guard let decodedResponse = try? JSONDecoder().decode(R.self, from: data) else {
+            throw NetErrors.runtimeError("Error decoding response")
+        }
+                
+        return decodedResponse
+    }
+    
+    private func fetchDataFromRemote() async throws -> Data {
         guard let request = self.urlRequest else {
             throw NetErrors.runtimeError("Bad URL")
         }
@@ -76,10 +92,24 @@ public class Endpoint: Request {
             throw NetErrors.runtimeError("Error response code: \(httpResponse.statusCode)")
         }
         
-        guard let reponse = try? JSONDecoder().decode(R.self, from: data) else {
-            throw NetErrors.runtimeError("Error decoding response")
+        if NetNetNet.shared.isCacheEnabled {
+            let cachedResponse = CachedURLResponse(response: response, data: data)
+            URLCache.shared.storeCachedResponse(cachedResponse, for: request)
         }
         
-        return reponse
+        return data
     }
+    
+    private func fetchDataFromCache() throws -> Data? {
+        guard let request = self.urlRequest else {
+            throw NetErrors.runtimeError("Bad URL")
+        }
+        
+        guard let cachedResponse = URLCache.shared.cachedResponse(for: request) else {
+            return nil
+        }
+        
+        return cachedResponse.data
+    }
+    
 }
