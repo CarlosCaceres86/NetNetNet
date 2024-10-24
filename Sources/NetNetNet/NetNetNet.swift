@@ -43,16 +43,36 @@ public final class NetNetNet {
 
 public struct APIConfig {
     // Basic configuration
-    var scheme: String = "https"
-    var host: String = ""
+    var scheme: String
+    var host: String
     // OAuth Configuration
-    var clientId: String = ""
-    var clientSecret: String = ""
-    var oauthEndpoint: String = ""
+    var clientId: String
+    var clientSecret: String
+    var oauthEndpoint: String
+    
+    public init(scheme: String = "https",
+                host: String,
+                clientId: String  = "",
+                clientSecret: String  = "",
+                oauthEndpoint: String  = "") {
+        self.scheme = scheme
+        self.host = host
+        self.clientId = clientId
+        self.clientSecret = clientSecret
+        self.oauthEndpoint = oauthEndpoint
+    }
 }
 
 public struct CacheConfig {
-    var memoryCapacity: Int = 20 * 1024 * 1024 // 20MB
-    var diskCapacity: Int = 100 * 1024 * 1024 // 100MB
-    var diskPath: String = "NeNetNetCache"
+    var memoryCapacity: Int
+    var diskCapacity: Int
+    var diskPath: String
+    
+    public init(memoryCapacity: Int = 20 * 1024 * 1024,
+                diskCapacity: Int = 100 * 1024 * 1024,
+                diskPath: String = "NeNetNetCache") {
+        self.memoryCapacity = memoryCapacity
+        self.diskCapacity = diskCapacity
+        self.diskPath = diskPath
+    }
 }

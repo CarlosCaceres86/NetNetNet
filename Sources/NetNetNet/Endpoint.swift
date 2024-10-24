@@ -52,9 +52,10 @@ public class Endpoint: Request {
         request.httpMethod = self.method.rawValue
         headers?.forEach({ request.addValue($1, forHTTPHeaderField: $0) })
         
-        if encoding == .json {
+        switch encoding {
+        case .json:
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        } else {
+        case .url:
             request.setValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
         }
         
