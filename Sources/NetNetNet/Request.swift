@@ -7,16 +7,16 @@
 
 import Foundation
 
-protocol pRequest {
+protocol RequestProtocol {
     func makeCall<R: Codable>() async throws -> R
 }
 
 @available(iOS 15.0, *)
-public class Request: pRequest {
+public class Request: RequestProtocol {
     let urlRequest: URLRequest?
     
     public init(endpoint: Endpoint) {
-        self.urlRequest = URLFactory.create(endpoint: endpoint)
+        self.urlRequest = URLFactory().create(endpoint: endpoint)
     }
     
     /* Public Methods */

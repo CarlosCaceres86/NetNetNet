@@ -7,14 +7,18 @@
 
 import Foundation
 
-class URLFactory {
-    static func create(endpoint: Endpoint) -> URLRequest? {
+public protocol URLFactoryProtocol {
+    func create(endpoint: Endpoint) -> URLRequest?
+}
+
+struct URLFactory: URLFactoryProtocol {
+    func create(endpoint: Endpoint) -> URLRequest? {
         var components = URLComponents()
         
         components.scheme = NetNetNet.shared.apiConfig?.scheme
         components.host = NetNetNet.shared.apiConfig?.host
         components.path = endpoint.path
-        components.queryItems = endpoint.queryItems?.map { URLQueryItem(name: $0, value: $1) }
+        components.queryItems = endpoint.queryItems?.map { URLQueryItem(name: $0.key, value: $0.value) }
         
         guard let url = components.url else {
             return nil
