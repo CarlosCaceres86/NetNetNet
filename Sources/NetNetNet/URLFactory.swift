@@ -7,24 +7,31 @@
 
 import Foundation
 
-public protocol URLFactoryProtocol {
+protocol URLFactoryProtocol {
     func create(endpoint: Endpoint) -> URLRequest?
 }
 
 struct URLFactory: URLFactoryProtocol {
+    private let netConfig: NetConfig
+    
+    init(netConfig: NetConfig) {
+        self.netConfig = netConfig
+    }
+    
     func create(endpoint: Endpoint) -> URLRequest? {
         var components = URLComponents()
         
-        components.scheme = NetNetNet.shared.apiConfig?.scheme
-        components.host = NetNetNet.shared.apiConfig?.host
+        components.scheme = netConfig.scheme
+        components.host = netConfig.host
         components.path = endpoint.path
-        components.queryItems = endpoint.queryItems?.map { URLQueryItem(name: $0.key, value: $0.value) }
+        components.queryItems = endpoint.queryItems
         
         guard let url = components.url else {
             return nil
         }
         
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: url,
+                                 cachePolicy: .returnCacheDataElseLoad)
         
         request.httpMethod = endpoint.method.rawValue
         endpoint.headers?.forEach({ request.addValue($1, forHTTPHeaderField: $0) })

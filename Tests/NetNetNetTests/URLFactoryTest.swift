@@ -2,15 +2,13 @@ import XCTest
 @testable import NetNetNet
 
 final class URLFactoryTest: XCTestCase {
+    // sut stands for Service Under Test
     private var sut: URLFactoryProtocol!
     
     override func setUpWithError() throws {
         try super.setUpWithError()
         
-        sut = URLFactory()
-        NetNetNet.initialize(apiConfig: APIConfig(scheme: "https",
-                                                  host: "testapi.com"),
-                             cacheConfig: nil)
+        sut = URLFactory(netConfig: NetConfigBuilder().build())
     }
     
     override func tearDown() {
@@ -18,65 +16,80 @@ final class URLFactoryTest: XCTestCase {
     }
     
     func testShouldAddSinglePathToUrl() throws {
-        let expectedUrl = "https://testapi.com/items"
-        let endpoint = Endpoint(path: "/items",
-                                method: .get)
+        let expectedUrl = "https://somehost.com/items"
+        let endpoint = EndpointBuilder()
+            .path("/items")
+            .build()
         let urlRequest = sut.create(endpoint: endpoint)
-        
         let builtUrl = try XCTUnwrap(urlRequest?.url?.absoluteString)
+        
         XCTAssertEqual(builtUrl, expectedUrl)
     }
     
     func testShouldAddMultipleQueryParametersToUrl() throws {
-        let expectedUrl = "https://testapi.com/items?item1=1&item=1&item3=1"
-        let endpoint = Endpoint(path: "/items",
-                                method: .post,
-                                queryItems: ["item1" : "1",
-                                             "item" : "1",
-                                             "item3" : "1"])
-        let builtUrl = try XCTUnwrap(sut.create(endpoint: endpoint)?.url?.absoluteString)
+        let expectedUrl = "https://somehost.com/items?item1=1&item=1&abc=1"
+        let queryItems: [URLQueryItem] = [URLQueryItem(name: "item1", value: "1"),
+                                          URLQueryItem(name: "item", value: "1"),
+                                          URLQueryItem(name: "abc", value: "1")]
+        let endpoint = EndpointBuilder()
+            .path("/items")
+            .queryItems(queryItems)
+            .build()
+        let urlRequest = sut.create(endpoint: endpoint)
+        let builtUrl = try XCTUnwrap(urlRequest?.url?.absoluteString)
+        
         XCTAssertEqual(builtUrl, expectedUrl)
     }
     
     func testShouldBuildGetRequest() throws {
-        let endpoint = Endpoint(path: "/items",
-                                method: .get)
-        let urlRequest = try XCTUnwrap(sut.create(endpoint: endpoint))
+        let endpoint = EndpointBuilder()
+            .method(.get)
+            .build()
+        let urlRequest = sut.create(endpoint: endpoint)
+        let httpMethod = try XCTUnwrap(urlRequest?.httpMethod)
         
-        XCTAssertEqual(urlRequest.httpMethod, "GET")
+        XCTAssertEqual(httpMethod, "GET")
     }
     
     func testShouldBuildPostRequest() throws {
-        let endpoint = Endpoint(path: "/items",
-                                method: .post)
-        let urlRequest = try XCTUnwrap(sut.create(endpoint: endpoint))
+        let endpoint = EndpointBuilder()
+            .method(.post)
+            .build()
+        let urlRequest = sut.create(endpoint: endpoint)
+        let httpMethod = try XCTUnwrap(urlRequest?.httpMethod)
         
-        XCTAssertEqual(urlRequest.httpMethod, "POST")
+        XCTAssertEqual(httpMethod, "POST")
     }
     
     func testShouldHaveJsonEncodingHeaders() throws {
-        let endpoint = Endpoint(path: "/items",
-                                encoding: .json,
-                                method: .get)
-        let urlRequest = try XCTUnwrap(sut.create(endpoint: endpoint))
+        let endpoint = EndpointBuilder()
+            .encoding(.json)
+            .build()
+        let result = sut.create(endpoint: endpoint)
+        let urlRequest = try XCTUnwrap(result)
         
         XCTAssertEqual(urlRequest.allHTTPHeaderFields?["Content-Type"], "application/json")
     }
     
     func testShouldHaveUrlEncodingHeaders() throws {
-        let endpoint = Endpoint(path: "/items",
-                                encoding: .url,
-                                method: .get)
-        let urlRequest = try XCTUnwrap(sut.create(endpoint: endpoint))
+        let endpoint = EndpointBuilder()
+            .encoding(.url)
+            .build()
+        let result = sut.create(endpoint: endpoint)
+        let urlRequest = try XCTUnwrap(result)
         
         XCTAssertEqual(urlRequest.allHTTPHeaderFields?["Content-Type"], "application/x-www-form-urlencoded; charset=utf-8")
     }
     
     func testInvalidRequest() {
-        let endpoint = Endpoint(path: "/items",
-                                encoding: .url,
-                                method: .get)
-        sut = MockEmptyURLRequestURLFactory()
-        XCTAssertNil(sut.create(endpoint: endpoint))
+        let endpoint = EndpointBuilder().build()
+        let netConfig = NetConfigBuilder()
+            .host("badhost{}")
+            .build()
+        
+        sut = URLFactory(netConfig: netConfig)
+        let urlRequest = sut.create(endpoint: endpoint)
+        
+        XCTAssertNil(urlRequest)
     }
 }

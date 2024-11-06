@@ -5,21 +5,24 @@
 //  Created by Carlos Cáceres González on 5/11/24.
 //
 
-public struct Endpoint {
-    let path: String
-    let encoding: Encoding
-    let method: HTTPMethods
-    let withAuth: Bool
-    let retries: Int
-    let queryItems: [String : String]?
-    let headers: [String : String]?
+import Foundation
 
+
+public struct Endpoint {
+    public var path: String
+    public var encoding: BodyEncoding
+    public var method: HTTPMethods
+    public var withAuth: Bool
+    public var retries: Int
+    public var queryItems: [URLQueryItem]?
+    public var headers: [String : String]?
+    
     public init(path: String,
-                encoding: Encoding = .json,
+                encoding: BodyEncoding = .json,
                 method: HTTPMethods = .get,
                 withAuth: Bool = false,
                 retries: Int = 0,
-                queryItems: [String : String]? = nil,
+                queryItems: [URLQueryItem]? = nil,
                 headers: [String : String]? = nil) {
         self.path = path
         self.encoding = encoding

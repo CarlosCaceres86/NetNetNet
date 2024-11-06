@@ -5,7 +5,7 @@
 //  Created by Carlos Cáceres González on 5/11/24.
 //
 
-public enum Encoding {
+public enum BodyEncoding {
     case json, url
 }
 
