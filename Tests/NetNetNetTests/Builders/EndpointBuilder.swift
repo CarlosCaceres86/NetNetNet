@@ -11,7 +11,7 @@ import Foundation
 
 final class EndpointBuilder {
     private var path: String = ""
-    private var encoding: BodyEncoding = .json
+    private var contentType: ContentType = .json
     private var method: HTTPMethods = .get
     private var withAuth: Bool = false
     private var retries: Int = 0
@@ -23,8 +23,8 @@ final class EndpointBuilder {
         return self
     }
     
-    func encoding(_ param: BodyEncoding) -> Self {
-        encoding = param
+    func contentType(_ param: ContentType) -> Self {
+        contentType = param
         return self
     }
     
@@ -55,7 +55,7 @@ final class EndpointBuilder {
     
     func build() -> Endpoint {
         .init(path: path,
-              encoding: encoding,
+              contentType: contentType,
               method: method,
               withAuth: withAuth,
               retries: retries,

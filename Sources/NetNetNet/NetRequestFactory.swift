@@ -1,5 +1,5 @@
 //
-//  URLFactory.swift
+//  NetRequestFactory.swift
 //  NetNetNet
 //
 //  Created by Carlos Cáceres González on 5/11/24.
@@ -7,18 +7,18 @@
 
 import Foundation
 
-protocol URLFactoryProtocol {
+public protocol NetRequestFactoryProtocol {
     func create(endpoint: Endpoint) -> URLRequest?
 }
 
-struct URLFactory: URLFactoryProtocol {
+public struct NetRequestFactory: NetRequestFactoryProtocol {
     private let netConfig: NetConfig
     
     init(netConfig: NetConfig) {
         self.netConfig = netConfig
     }
     
-    func create(endpoint: Endpoint) -> URLRequest? {
+    public func create(endpoint: Endpoint) -> URLRequest? {
         var components = URLComponents()
         
         components.scheme = netConfig.scheme
@@ -36,7 +36,7 @@ struct URLFactory: URLFactoryProtocol {
         request.httpMethod = endpoint.method.rawValue
         endpoint.headers?.forEach({ request.addValue($1, forHTTPHeaderField: $0) })
         
-        switch endpoint.encoding {
+        switch endpoint.contentType {
         case .json:
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         case .url:

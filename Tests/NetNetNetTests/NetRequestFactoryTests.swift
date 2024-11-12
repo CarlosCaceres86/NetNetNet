@@ -1,18 +1,20 @@
 import XCTest
 @testable import NetNetNet
 
-final class URLFactoryTest: XCTestCase {
+final class NetRequestFactoryTests: XCTestCase {
     // sut stands for Service Under Test
-    private var sut: URLFactoryProtocol!
+    private var sut: NetRequestFactoryProtocol!
     
     override func setUpWithError() throws {
         try super.setUpWithError()
         
-        sut = URLFactory(netConfig: NetConfigBuilder().build())
+        sut = NetRequestFactory(netConfig: NetConfigBuilder().build())
     }
     
-    override func tearDown() {
+    override func tearDownWithError() throws {
         sut = nil
+        
+        try super.tearDownWithError()
     }
     
     func testShouldAddSinglePathToUrl() throws {
@@ -63,7 +65,7 @@ final class URLFactoryTest: XCTestCase {
     
     func testShouldHaveJsonEncodingHeaders() throws {
         let endpoint = EndpointBuilder()
-            .encoding(.json)
+            .contentType(.json)
             .build()
         let result = sut.create(endpoint: endpoint)
         let urlRequest = try XCTUnwrap(result)
@@ -73,7 +75,7 @@ final class URLFactoryTest: XCTestCase {
     
     func testShouldHaveUrlEncodingHeaders() throws {
         let endpoint = EndpointBuilder()
-            .encoding(.url)
+            .contentType(.url)
             .build()
         let result = sut.create(endpoint: endpoint)
         let urlRequest = try XCTUnwrap(result)
@@ -87,7 +89,7 @@ final class URLFactoryTest: XCTestCase {
             .host("badhost{}")
             .build()
         
-        sut = URLFactory(netConfig: netConfig)
+        sut = NetRequestFactory(netConfig: netConfig)
         let urlRequest = sut.create(endpoint: endpoint)
         
         XCTAssertNil(urlRequest)
