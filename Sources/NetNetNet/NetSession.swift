@@ -8,10 +8,9 @@
 import Foundation
 
 public protocol NetSessionProtocol {
-    func data(for request: URLRequest) async throws -> (Data, URLResponse)
+    func data(for request: URLRequest) async throws -> NetResponse
 }
 
-@available(iOS 15.0, *)
 class NetSession: NetSessionProtocol {
     let urlSession: URLSession
     
@@ -19,20 +18,28 @@ class NetSession: NetSessionProtocol {
         self.urlSession = urlSession
     }
     
-    func data(for request: URLRequest) async throws -> (Data, URLResponse) {
-        return try await urlSession.data(for: request)
+    func data(for request: URLRequest) async throws -> NetResponse {
+        let (data, response) = try await urlSession.data(for: request)
+        return NetResponse(data: data, urlResponse: response)
     }
 }
 
-@available(iOS 15.0, *)
-public enum NetSessionFactory {
-    nonisolated(unsafe) public static var netSession: NetSessionProtocol = NetSession(urlSession: urlSession)
-    nonisolated(unsafe) private static var urlSession: URLSession = {
+//public enum NetSessionFactory {
+//    public static var netSession: NetSessionProtocol = NetSession(urlSession: urlSession)
+//    private static var urlSession: URLSession = {
+//        let configuration = URLSessionConfiguration.default
+//        configuration.httpCookieStorage = nil
+//        
+//        return URLSession(configuration: configuration)
+//    }()
+//}
+
+public struct NetSessionFactory {
+    public static var netSession: NetSessionProtocol = NetSession(urlSession: urlSession)
+    private static var urlSession: URLSession = {
         let configuration = URLSessionConfiguration.default
         configuration.httpCookieStorage = nil
         
-        let session = URLSession(configuration: configuration)
-        
-        return session
+        return URLSession(configuration: configuration)
     }()
 }

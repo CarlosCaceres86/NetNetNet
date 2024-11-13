@@ -7,16 +7,14 @@
 
 import Foundation
 
-public protocol NetRequestProtocol {
-    func makeCall<R: Codable>() async throws -> R
+public protocol NetClientProtocol {
+    func makeRequest() async throws -> NetResponse
 }
 
-@available(iOS 15.0, *)
-public class NetClient: NetRequestProtocol {
+public class NetClient: NetClientProtocol {
     let netRequestFactory: NetRequestFactoryProtocol
     let endpoint: Endpoint
     let netSession: NetSessionProtocol
-    
     
     public init(endpoint: Endpoint,
                 netRequestFactory: NetRequestFactoryProtocol,
@@ -26,15 +24,14 @@ public class NetClient: NetRequestProtocol {
         self.netSession = netSession
     }
     
-    // MARK: Public Methods
-    public func makeCall<R: Codable>() async throws -> R {
+    public func makeRequest() async throws -> NetResponse {
         guard let request: URLRequest = netRequestFactory.create(endpoint: endpoint) else {
             throw URLError(.badURL)
         }
         
-        let (data, response) = try await netSession.data(for: request)
+        let netResponse = try await netSession.data(for: request)
         
-        guard let httpResponse: HTTPURLResponse = response as? HTTPURLResponse else {
+        guard let httpResponse: HTTPURLResponse = netResponse.urlResponse as? HTTPURLResponse else {
             throw URLError(.badServerResponse)
         }
 
@@ -43,11 +40,7 @@ public class NetClient: NetRequestProtocol {
             throw URLError(errorCode,
                            userInfo: [NSLocalizedDescriptionKey : "Unknown error"])
         }
-        
-        guard let decodedResponse = try? JSONDecoder().decode(R.self, from: data) else {
-            throw URLError(.cannotDecodeRawData)
-        }
-                
-        return decodedResponse
+                        
+        return netResponse
     }
 }

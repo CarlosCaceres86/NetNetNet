@@ -12,7 +12,7 @@ final class NetRequestFactoryMock: NetRequestFactoryProtocol {
     private(set) var times: Int = 0
     var urlRequest: URLRequest?
     
-    func create(endpoint: NetNetNet.Endpoint) -> URLRequest? {
+    func create(endpoint: Endpoint) -> URLRequest? {
         times += 1
         
         return urlRequest
