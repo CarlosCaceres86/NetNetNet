@@ -9,23 +9,23 @@ import Foundation
 
 
 public struct Endpoint {
-    public var path: String
-    public var encoding: BodyEncoding
-    public var method: HTTPMethods
-    public var withAuth: Bool
-    public var retries: Int
-    public var queryItems: [URLQueryItem]?
-    public var headers: [String : String]?
+    var path: String
+    var contentType: ContentType
+    var method: HTTPMethods
+    var withAuth: Bool
+    var retries: Int
+    var queryItems: [URLQueryItem]?
+    var headers: [String : String]?
     
     public init(path: String,
-                encoding: BodyEncoding = .json,
+                contentType: ContentType = .json,
                 method: HTTPMethods = .get,
                 withAuth: Bool = false,
                 retries: Int = 0,
                 queryItems: [URLQueryItem]? = nil,
                 headers: [String : String]? = nil) {
         self.path = path
-        self.encoding = encoding
+        self.contentType = contentType
         self.method = method
         self.withAuth = withAuth
         self.retries = retries
