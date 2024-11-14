@@ -5,7 +5,7 @@
 //  Created by Carlos Cáceres González on 5/11/24.
 //
 
-public enum BodyEncoding {
+public enum ContentType {
     case json, url
 }
 
@@ -18,8 +18,4 @@ public enum HTTPMethods: String {
     case options = "OPTIONS"
     case connect = "CONNECT"
     case patch = "PATCH"    
-}
-
-enum NetErrors: Error {
-    case runtimeError(String)
 }
