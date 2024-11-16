@@ -24,17 +24,10 @@ class NetSession: NetSessionProtocol {
     }
 }
 
-//public enum NetSessionFactory {
-//    public static var netSession: NetSessionProtocol = NetSession(urlSession: urlSession)
-//    private static var urlSession: URLSession = {
-//        let configuration = URLSessionConfiguration.default
-//        configuration.httpCookieStorage = nil
-//        
-//        return URLSession(configuration: configuration)
-//    }()
-//}
-
-public struct NetSessionFactory {
+/// NetSessionFactory is a convenient way to inject a NetSession object
+/// by default in the NetClient initializer.
+/// - warning: It is an Enum to avoid this Facotry being instantiated
+public enum NetSessionFactory {
     public static var netSession: NetSessionProtocol = NetSession(urlSession: urlSession)
     private static var urlSession: URLSession = {
         let configuration = URLSessionConfiguration.default
